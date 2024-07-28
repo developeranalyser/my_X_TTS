@@ -27,8 +27,8 @@ GRAD_ACUMM_STEPS = 84  # set here the grad accumulation steps
 config_dataset = BaseDatasetConfig(
     formatter="ljspeech",
     dataset_name="ljspeech",
-    path="/raid/datasets/LJSpeech-1.1_24khz/",
-    meta_file_train="/raid/datasets/LJSpeech-1.1_24khz/metadata.csv",
+    path="/content/my_X_TTS/raid/datasets/LJSpeech-1.1_24khz/",
+    meta_file_train="/content/my_X_TTS/raid/datasets/LJSpeech-1.1_24khz/metadata.csv",
     language="en",
 )
 
@@ -72,7 +72,7 @@ if not os.path.isfile(TOKENIZER_FILE) or not os.path.isfile(XTTS_CHECKPOINT):
 
 # Training sentences generations
 SPEAKER_REFERENCE = [
-    "./tests/data/ljspeech/wavs/LJ001-0002.wav"  # speaker reference to be used in training test sentences
+    "/content/my_X_TTS/tests/data/ljspeech/wavs/LJ001-0002.wav"  # speaker reference to be used in training test sentences
 ]
 LANGUAGE = config_dataset.language
 
