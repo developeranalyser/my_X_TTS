@@ -112,6 +112,7 @@ def main():
         batch_size=BATCH_SIZE,
         batch_group_size=48,
         eval_batch_size=BATCH_SIZE,
+        eval_split_size=4,
         num_loader_workers=8,
         eval_split_max_size=256,
         print_step=50,
