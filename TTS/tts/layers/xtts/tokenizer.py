@@ -49,11 +49,11 @@ def split_sentence(text, lang, text_split_length=250):
             elif len(str(sentence)) > text_split_length:
                 # if the current sentence is greater than the text_split_length
                 for line in textwrap.wrap(
-                    str(sentence),
-                    width=text_split_length,
-                    drop_whitespace=True,
-                    break_on_hyphens=False,
-                    tabsize=1,
+                        str(sentence),
+                        width=text_split_length,
+                        drop_whitespace=True,
+                        break_on_hyphens=False,
+                        tabsize=1,
                 ):
                     text_splits.append(str(line))
             else:
@@ -169,6 +169,12 @@ _abbreviations = {
         (re.compile("\\b%s\\." % x[0], re.IGNORECASE), x[1])
         for x in [
             # There are not many common abbreviations in Arabic as in English.
+        ]
+    ],
+    "fa": [
+        (re.compile("\\b%s\\." % x[0], re.IGNORECASE), x[1])
+        for x in [
+            # There are not many common abbreviations in farsi as in English.
         ]
     ],
     "zh": [
@@ -336,6 +342,19 @@ _symbols_multilingual = {
             ("°", " درجة "),
         ]
     ],
+    "fa": [
+        # Arabic
+        (re.compile(r"%s" % re.escape(x[0]), re.IGNORECASE), x[1])
+        for x in [
+            ("&", " و "),
+            ("@", " اتساین "),
+            ("%", " درصد "),
+            ("#", " هشتگ "),
+            ("$", " دولار "),
+            ("£", " جنيه "),
+            ("°", " درجه "),
+        ]
+    ],
     "zh": [
         # Chinese
         (re.compile(r"%s" % re.escape(x[0]), re.IGNORECASE), x[1])
@@ -444,6 +463,7 @@ _ordinal_re = {
     "it": re.compile(r"([0-9]+)(º|°|ª|o|a|i|e)"),
     "pl": re.compile(r"([0-9]+)(º|ª|st|nd|rd|th)"),
     "ar": re.compile(r"([0-9]+)(ون|ين|ث|ر|ى)"),
+    "fa": re.compile(r"([0-9]+)(ون|ين|ث|ر|ى)"),  # todo
     "cs": re.compile(r"([0-9]+)\.(?=\s|$)"),  # In Czech, a dot is often used after the number to indicate ordinals.
     "ru": re.compile(r"([0-9]+)(-й|-я|-е|-ое|-ье|-го)"),
     "nl": re.compile(r"([0-9]+)(de|ste|e)"),
@@ -498,6 +518,7 @@ def _expand_currency(m, lang="en", currency="USD"):
         "ru": ", ",
         "nl": ", ",
         "ar": ", ",
+        "fa": ", ",
         "tr": ", ",
         "hu": ", ",
         "ko": ", ",
@@ -604,6 +625,7 @@ class VoiceBpeTokenizer:
             "pl": 224,
             "zh": 82,
             "ar": 166,
+            "fa": 222,
             "cs": 186,
             "ru": 182,
             "nl": 251,
@@ -628,7 +650,7 @@ class VoiceBpeTokenizer:
             )
 
     def preprocess_text(self, txt, lang):
-        if lang in {"ar", "cs", "de", "en", "es", "fr", "hu", "it", "nl", "pl", "pt", "ru", "tr", "zh", "ko"}:
+        if lang in {"ar", "fa", "cs", "de", "en", "es", "fr", "hu", "it", "nl", "pl", "pt", "ru", "tr", "zh", "ko"}:
             txt = multilingual_cleaners(txt, lang)
             if lang == "zh":
                 txt = chinese_transliterate(txt)
@@ -728,6 +750,14 @@ def test_expand_numbers_multilingual():
         ("كان هناك 50 جنديًا.", "كان هناك خمسون جنديًا.", "ar"),
         # ("ستكون النتيجة $20 يا سيد.", 'ستكون النتيجة عشرون دولار يا سيد.', 'ar'), # $ and € are mising from num2words
         # ("ستكون النتيجة 20€ يا سيد.", 'ستكون النتيجة عشرون يورو يا سيد.', 'ar'),
+        # Farsi
+        ("در 12.5 ثانیه.", "در دوازده نقطه پنج ثانیه.", "fa"),
+        ("50 سرباز بود.", "پنجاه سرباز بود.", "fa"),
+        ("این یک آزمون اول است", "این اولین آزمون است", "fa"),
+        ("این میشه 20 دلار آقا.", "این میشه بیست دلار آقا.", "fa"),
+        ("آقا 20 یورو خواهد بود.", "آقا بیست یورو خواهد بود.", "fa"),
+        ("این 20.15 یورو خواهد بود قربان.", "این می شود بیست یورو, پانزده سنت آقا.", "fa"),
+        ("این 100000.5 است.", "این صد هزار نقطه پنج است.", "fa"),
         # Czech
         ("Za 12,5 vteřiny.", "Za dvanáct celá pět vteřiny.", "cs"),
         ("Bylo tam 50 vojáků.", "Bylo tam padesát vojáků.", "cs"),
@@ -803,6 +833,9 @@ def test_abbreviations_multilingual():
         ("Dr. Ayşe burada.", "doktor Ayşe burada.", "tr"),
         # Hungarian
         ("Dr. Szabó itt van.", "doktor Szabó itt van.", "hu"),
+        # Farsi
+        ("سلام آقای اسمیت.", "سلام آقای اسمیت.", "fa"),
+        ("دکتر جونز اینجاست.", "دکتر جونز اینجاست.", "fa"),
     ]
 
     for a, b, lang in test_cases:
@@ -826,6 +859,7 @@ def test_symbols_multilingual():
         ("Ik heb 14% batterij", "Ik heb 14 procent batterij", "nl"),
         ("Ik zie je @ het feest", "Ik zie je bij het feest", "nl"),
         ("لدي 14% في البطارية", "لدي 14 في المئة في البطارية", "ar"),
+        ("من 14 درصد شارژ باتری دارم", "من 14 درصد شارژ باتری دارم", "fa"),
         ("我的电量为 14%", "我的电量为 14 百分之", "zh"),
         ("Pilim %14 dolu.", "Pilim yüzde 14 dolu.", "tr"),
         ("Az akkumulátorom töltöttsége 14%", "Az akkumulátorom töltöttsége 14 százalék", "hu"),
